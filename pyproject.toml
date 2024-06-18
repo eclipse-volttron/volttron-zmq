@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "volttron"
+version = "0.1.0"
+description = ""
+authors = ["C. Allwardt <3979063+craig8@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+volttron-core = { path="../volttron-core", develop = true}
+volttron-lib-auth = { path="../volttron-lib-auth", develop = true}
+volttron-lib-auth-zap = { path="../volttron-lib-auth-zap", develop = true}
+volttron-lib-zmq = { path="../volttron-lib-zmq", develop = true}
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
