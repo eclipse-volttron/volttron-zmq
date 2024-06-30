@@ -9,7 +9,6 @@ readme = "README.md"
 python = "^3.10"
 volttron-core = { path="../volttron-core", develop = true}
 volttron-lib-auth = { path="../volttron-lib-auth", develop = true}
-volttron-lib-auth-zap = { path="../volttron-lib-auth-zap", develop = true}
 volttron-lib-zmq = { path="../volttron-lib-zmq", develop = true}
 
 [build-system]
