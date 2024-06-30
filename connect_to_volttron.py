@@ -1,8 +1,12 @@
+from pathlib import Path
+import json
+
 import zmq.green as zmq
 from zmq.utils import z85
 import zmq.auth
 import base64
 import binascii
+from volttron.client.known_identities import CONTROL_CONNECTION
 
 
 def encode_key(key):
@@ -43,35 +47,50 @@ def decode_key(key):
 
 ctx = zmq.Context.instance()
 
-address = 'ipc://@/home/os2204/.volttron_redo/run/vip.socket'
+#address = 'ipc://@/home/os2204/.volttron_redo/run/vip.socket'
 #address = 'tcp://127.0.0.1:22916'
 
-server_key_store = {
-    "public": "GaN29vtS9Eowfkz9_8skI01ePdJLXhl1VrZmkE2zFCI",
-    "secret": "ILvSu5p4IYL0vXxCfmajchTL2rbRgCRg4IZ1q4FXmoM"
-}
+volttron_home = '/home/os2204/.volttron_redo'
+#volttron_home = '/home/os2204/.volttron_original'
 
-"ipc://@/home/os2204/.volttron_redo/run/vip.socket?publickey=HqKAAZc6s_CNf1Xlmi5V8SYlmjQ09mFvFL0HMwzuiVU&secretkey=LOsjvmfjEQWKqlQdphxMr8incSro9CTsP2Vm_Arvl80&serverkey=BkZi1cYswb19qoxXSkb1Cs4b3-7hX8nQ48CZY_WwG1U"
+address = 'ipc://@' + str(Path(volttron_home) / "run/vip.socket")
+cred_path = Path(volttron_home) / "credentials_store/control.connection.json"
+#cred_path = (Path(volttron_home) / "keystores/control.connection/keystore.json")
+server_cred_path = Path(volttron_home) / "credentials_store/platform.json"
+#server_cred_path = Path(volttron_home) / "keystore"
+
+cred_key_store = json.loads(cred_path.read_text())
+if 'publickey' not in cred_key_store:
+    cred_key_store['publickey'] = cred_key_store['public']
+    cred_key_store['secretkey'] = cred_key_store['secret']
+
+server_key_store = json.loads(server_cred_path.read_text())
+if 'publickey' not in server_key_store:
+    server_key_store['publickey'] = server_key_store['public']
+    server_key_store['secretkey'] = server_key_store['secret']
+
+
+#"ipc://@/home/os2204/.volttron_original/run/vip.socket?publickey=HqKAAZc6s_CNf1Xlmi5V8SYlmjQ09mFvFL0HMwzuiVU&secretkey=LOsjvmfjEQWKqlQdphxMr8incSro9CTsP2Vm_Arvl80&serverkey=hZoDI7McGJG8K7tCnyEJxl0FFIQiXCHxvRh2pylxukI"
 
 
 #server_public_key = "BkZi1cYswb19qoxXSkb1Cs4b3-7hX8nQ48CZY_WwG1U"
-server_public_key = "V9E9fKdD4vPydbnm4ugQLbddn6rg_Iht504ucJZEZn0"
+server_public_key = server_key_store['publickey']
 
-control_conn_store = {
-    "identity": "control.connection",
-    "publickey": "HqKAAZc6s_CNf1Xlmi5V8SYlmjQ09mFvFL0HMwzuiVU",
-    "secretkey": "LOsjvmfjEQWKqlQdphxMr8incSro9CTsP2Vm_Arvl80"
-}
+#client_creds = json.loads(cred_path.read_text())
+#control_conn_store = client_creds
+
 
 client = ctx.socket(zmq.DEALER)
-client.curve_secretkey = decode_key(control_conn_store["secretkey"])
-client.curve_publickey = decode_key(control_conn_store["publickey"])
+client.identity = CONTROL_CONNECTION.encode("utf-8")
+client.curve_secretkey = decode_key(cred_key_store["secretkey"])
+client.curve_publickey = decode_key(cred_key_store["publickey"])
 client.curve_serverkey = decode_key(server_public_key)
 
 client.connect(address)
 
-if client.poll(1000):
+if client.poll():
     msg = client.recv()
+    print(f"Received: {msg!r}")
     if msg == b"Hello":
         print("Ironhouse test OK")
     else:
