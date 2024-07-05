@@ -6,8 +6,9 @@ from zmq.utils import z85
 import zmq.auth
 import base64
 import binascii
-from volttron.client.known_identities import CONTROL_CONNECTION
 
+#from volttron.client.known_identities import CONTROL_CONNECTION
+CONTROL_CONNECTION = 'control.connection'
 
 def encode_key(key):
     '''Base64-encode and return a key in a URL-safe manner.'''
@@ -48,12 +49,12 @@ def decode_key(key):
 ctx = zmq.Context.instance()
 
 #address = 'ipc://@/home/os2204/.volttron_redo/run/vip.socket'
-#address = 'tcp://127.0.0.1:22916'
+address = 'tcp://127.0.0.1:22916'
 
 volttron_home = '/home/os2204/.volttron_redo'
 #volttron_home = '/home/os2204/.volttron_original'
 
-address = 'ipc://@' + str(Path(volttron_home) / "run/vip.socket")
+#address = 'ipc://@' + str(Path(volttron_home) / "run/vip.socket")
 cred_path = Path(volttron_home) / "credentials_store/control.connection.json"
 #cred_path = (Path(volttron_home) / "keystores/control.connection/keystore.json")
 server_cred_path = Path(volttron_home) / "credentials_store/platform.json"
@@ -85,6 +86,15 @@ client.identity = CONTROL_CONNECTION.encode("utf-8")
 client.curve_secretkey = decode_key(cred_key_store["secretkey"])
 client.curve_publickey = decode_key(cred_key_store["publickey"])
 client.curve_serverkey = decode_key(server_public_key)
+
+print(f"publickey: {cred_key_store['publickey']}")
+print(f"decoded publickey: {decode_key(cred_key_store['publickey'])}")
+
+print(f"secretkey: {cred_key_store['secretkey']}")
+print(f"decoded secretkey: {decode_key(cred_key_store['secretkey'])}")
+
+print(f"serverkey: {server_public_key}")
+print(f"decoded serverkey: {decode_key(server_public_key)}")
 
 client.connect(address)
 
