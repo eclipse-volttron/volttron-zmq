@@ -1,12 +1,12 @@
 [tool.poetry]
 name = "volttron"
-version = "0.1.0"
-description = "VOLTTORN wrapper library to bundle volttron-core voltron-lib-auth and volttron-lib-zmq"
+version = "0.1.1"
+description = "VOLTTORN wrapper library to bundle volttron-core voltron-lib-auth and volttron-lib-zmq."
 license = "Apache-2.0"
 authors = ["volttron <volttron@pnnl.gov>"]
 readme = "README.md"
 homepage = "https://volttron.org"
-repository = "https://github.com/eclipse-volttron/volttron-core"
+repository = "https://github.com/eclipse-volttron/volttron-zmq"
 documentation = "https://volttron.readthedocs.org"
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -27,6 +27,30 @@ python = "^3.10"
 volttron-core = { path="../volttron-core", develop = true}
 volttron-lib-auth = { path="../volttron-lib-auth", develop = true}
 volttron-lib-zmq = { path="../volttron-lib-zmq", develop = true}
+
+[tool.poetry.group.dev.dependencies]
+types-gevent = "^24.2.0.20240806"
+pre-commit = "^3.8.0"
+yapf = "^0.40.2"
+
+[tool.yapfignore]
+ignore_patterns = [
+    ".venv/**",
+    ".pytest_cache/**",
+    "dist/**",
+    "docs/**"
+]
+
+[tool.yapf]
+based_on_style = "pep8"
+spaces_before_comment = 4
+column_limit = 99
+split_before_logical_operator = true
+
+[tool.mypy]
+show_error_context = true
+pretty = true
+show_column_numbers = true
 
 [build-system]
 requires = ["poetry-core"]
