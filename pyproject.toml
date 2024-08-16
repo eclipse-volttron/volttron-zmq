@@ -19,7 +19,7 @@ classifiers = [
 ]
 
 packages = [
-    { include = "volttron", from = "src" }
+    { include = "volttronwrapper", from = "src" }
 ]
 
 [tool.poetry.dependencies]
