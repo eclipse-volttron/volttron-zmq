@@ -27,7 +27,6 @@ python = "^3.10"
 volttron-core = { path="../volttron-core", develop = true}
 volttron-lib-auth = { path="../volttron-lib-auth", develop = true}
 volttron-lib-zmq = { path="../volttron-lib-zmq", develop = true}
-volttron-listener = {path = "/home/chandrika/vhomes/install_source_test/wheelhouse/volttron_listener-1.0-py3-none-any.whl"}
 
 [build-system]
 requires = ["poetry-core"]
