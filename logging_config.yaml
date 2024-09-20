@@ -25,6 +25,7 @@ loggers:
         level: INFO
     volttron.messagebus:
         level: INFO
+
     development:
         level: DEBUG
         handlers: [console]
