@@ -15,16 +15,16 @@ handlers:
 
     file:
         class: logging.FileHandler
-        level: INFO
+        level: DEBUG
         formatter: simple
-        filename: myapp.log
+        filename: volttron.log
         mode: a
 
 loggers:
     volttron.client:
         level: INFO
     volttron.messagebus:
-        level: INFO
+        level: DEBUG
 
     development:
         level: DEBUG
@@ -43,4 +43,4 @@ loggers:
 
 root:
     level: DEBUG
-    handlers: [console]
+    handlers: [console, file]
