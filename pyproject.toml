@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "volttron-zmq"
+name = "volttron"
 version = "11.0.0rc0"
 description = "VOLTTORN wrapper library to bundle volttron-core voltron-lib-auth and volttron-lib-zmq."
 license = "Apache-2.0"
