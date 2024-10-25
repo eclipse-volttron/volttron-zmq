@@ -1,6 +1,6 @@
 [tool.poetry]
-name = "volttron"
-version = "11.0.0rc0"
+name = "volttron-zmq"
+version = "11.0.0rc1"
 description = "VOLTTORN wrapper library to bundle volttron-core voltron-lib-auth and volttron-lib-zmq."
 license = "Apache-2.0"
 authors = ["volttron <volttron@pnnl.gov>"]
@@ -24,12 +24,12 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.10"
+volttron-core = "^2.0.0rc3"
+volttron-lib-auth = "^2.0.0rc1"
+volttron-lib-zmq = "^2.0.0rc4"
 #volttron-core = { path="../volttron-core", develop = true}
 #volttron-lib-auth = { path="../volttron-lib-auth", develop = true}
 #volttron-lib-zmq = { path="../volttron-lib-zmq", develop = true}
-volttron-core = ">=2.0.0rc0"
-volttron-lib-auth = ">=2.0.0rc0"
-volttron-lib-zmq = ">=2.0.0rc0"
 
 
 [tool.poetry.group.dev.dependencies]
