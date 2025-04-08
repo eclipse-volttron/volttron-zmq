@@ -9,7 +9,7 @@ formatters:
 handlers:
     console:
         class: logging.StreamHandler
-        level: DEBUG
+        level: ERROR
         formatter: simple
         stream: ext://sys.stdout
 
@@ -17,14 +17,15 @@ handlers:
         class: logging.FileHandler
         level: INFO
         formatter: simple
-        filename: myapp.log
+        filename: volttron.log
         mode: a
 
 loggers:
+
     volttron.client:
-        level: INFO
+        level: WARNING
     volttron.messagebus:
-        level: INFO
+        level: WARNING
     development:
         level: DEBUG
         handlers: [console]
@@ -41,5 +42,5 @@ loggers:
         propagate: no
 
 root:
-    level: DEBUG
-    handlers: [console]
+    level: WARNING
+    handlers: [console, file]
