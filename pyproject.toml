@@ -24,12 +24,12 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.10"
-volttron-core = "^2.0.0rc3"
-volttron-lib-auth = "^2.0.0rc1"
-volttron-lib-zmq = "^2.0.0rc4"
-#volttron-core = { path="../volttron-core", develop = true}
-#volttron-lib-auth = { path="../volttron-lib-auth", develop = true}
-#volttron-lib-zmq = { path="../volttron-lib-zmq", develop = true}
+#volttron-core = "^2.0.0rc3"
+#volttron-lib-auth = "^2.0.0rc1"
+#volttron-lib-zmq = "^2.0.0rc4"
+volttron-core = { path="../volttron-core", develop = true}
+volttron-lib-auth = { path="../volttron-lib-auth", develop = true}
+volttron-lib-zmq = { path="../volttron-lib-zmq", develop = true}
 
 
 [tool.poetry.group.dev.dependencies]
