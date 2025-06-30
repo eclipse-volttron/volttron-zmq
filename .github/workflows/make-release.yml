@@ -1,4 +1,4 @@
-name: Make full release
+name: Deploy Release Artifacts
 
 on:
   workflow_dispatch:
@@ -14,29 +14,15 @@ on:
         default: ''
         type: string
       bump-rule:
-        description: 'Bump rule for computing next release version number.'
+        description: 'Bump rule for computing next release version number. Used when no release-version is given. Valid choices are: patch, minor, major, prepatch, preminor, premajor, prerelease'
         required: false
         default: 'prerelease'
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
-          - prepatch
-          - preminor
-          - premajor
-          - prerelease
-      run-tests-wait:
-        description: 'Wait time to run test after merge to main'
-        required: false
-        default: 600
-        type: number
+        type: string
       publish-option:
-        description: 'Choose where to publish: pypi, test-pypi, or none. Valid options are "pypi", "test-pypi", or "none"'
+        description: 'Choose where to publish: pypi, test-pypi, or none. Valid options are "pypi", "test-pypi", or "none".'
         required: false
         default: 'none'
         type: string
-      
 
 defaults:
   run:
@@ -46,20 +32,121 @@ env:
   LANG: en_US.utf-8
   LC_ALL: en_US.utf-8
   PYTHON_VERSION: '3.10'
+  POETRY_VERSION: '2.1.1'
 
 jobs:
-  call-deploy-release:
+
+  deploy-release:
+    runs-on: ubuntu-22.04
     permissions:
       contents: write  # To push a branch
       pull-requests: write  # To create a PR from that branch
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
 
-    uses: eclipse-volttron/github-tooling/.github/workflows/deploy-release.yml@main
-    with:
-      merge-strategy: ${{ inputs.merge-strategy }}
-      release-version: ${{ inputs.release-version }}
-      bump-rule: ${{ inputs.bump-rule }}
-      run-tests-wait: 60
-      publish-option: ${{ inputs.publish-option }}
-    secrets:
-      git-token: ${{ secrets.AUTO_PROJECT_PAT }}
-      pypi-token: ${{ secrets.PYPI_TOKEN }}
+      #----------------------------------------------
+      #       check-out repo and set-up python
+      #----------------------------------------------
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0
+          ref: main
+          token: ${{ secrets.AUTO_PROJECT_PAT }}
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      #----------------------------------------------
+      #  -----  install & configure poetry  -----
+      #----------------------------------------------
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: ${{ env.POETRY_VERSION }}
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+
+      #----------------------------------------------
+      #       load cached venv if cache exists
+      #----------------------------------------------
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+      #----------------------------------------------
+      # install dependencies if cache does not exist
+      #----------------------------------------------
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root --without dev
+
+      #----------------------------------------------
+      # install your root project, if required
+      #----------------------------------------------
+      - name: Install library
+        run: |
+          poetry install --no-interaction --without dev
+
+      - name: bump pyproject.toml version
+        run: |
+            current_version=$(poetry version --short)
+            echo $current_version
+            poetry version prerelease --no-interaction
+            NEW_TAG=v$(poetry version --short)
+            echo "NEW_TAG=$(echo ${NEW_TAG})" >> $GITHUB_ENV
+            echo "source branch is ${{ github.ref_name }}"
+
+      # ----------------------------------------------
+      # Auto commit toml file
+      # ----------------------------------------------
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: bumped pre-release version to ${{ env.NEW_TAG }}
+          branch: ${{ github.ref_name }}
+
+      #--------------------------------------------------------------
+      # Create a new releases/new_tag
+      #--------------------------------------------------------------
+      - name: Create a new releases branch
+        run: |
+          git checkout -b releases/${NEW_TAG}
+          git push --set-upstream origin releases/${NEW_TAG}
+
+      - name: Create build artifacts
+        run: |
+          # set the right version in pyproject.toml before build and publish
+          poetry version ${NEW_TAG#?} 
+          poetry build -vvv
+
+      - uses: ncipollo/release-action@v1
+        with:
+          artifacts: "dist/*.gz,dist/*.whl"
+          artifactErrorsFailBuild: true
+          generateReleaseNotes: true
+          commit: ${{ github.ref }}
+          prerelease: ${{ inputs.bump-rule == 'prerelease' }}
+          tag: ${{ env.NEW_TAG }}
+          token: ${{ secrets.AUTO_PROJECT_PAT }}
+
+      - name: Publish to pypi
+        if: ${{ inputs.publish-option == 'pypi' }}
+        run: |
+          echo "POETRY_PUBLISH_OPTIONS=''" >> $GITHUB_ENV
+          poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
+          poetry publish
+      - name: Publish to test-pypi
+        if: ${{ inputs.publish-option == 'test-pypi' }}
+        run: |
+          poetry config repositories.test-pypi https://test.pypi.org/legacy/
+          poetry config pypi-token.test-pypi ${{ secrets.TEST_PYPI_TOKEN }}
+          poetry publish -r test-pypi
