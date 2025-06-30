@@ -31,11 +31,11 @@ on:
         required: false
         default: 600
         type: number
-      publish-to-test-pypi:
-        description: 'Set to true if you want to publish to https://test.pypi.org/legacy/ instead of pypi.org'
+      publish-option:
+        description: 'Choose where to publish: pypi, test-pypi, or none. Valid options are "pypi", "test-pypi", or "none"'
         required: false
-        default: false
-        type: boolean
+        default: 'none'
+        type: string
       
 
 defaults:
