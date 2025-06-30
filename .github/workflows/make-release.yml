@@ -58,7 +58,7 @@ jobs:
       merge-strategy: ${{ inputs.merge-strategy }}
       release-version: ${{ inputs.release-version }}
       bump-rule: ${{ inputs.bump-rule }}
-      run-tests-wait: ${{ inputs.run-tests-wait }}
+      run-tests-wait: 60
       publish-option: ${{ inputs.publish-option }}
     secrets:
       git-token: ${{ secrets.AUTO_PROJECT_PAT }}
