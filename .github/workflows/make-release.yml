@@ -58,8 +58,8 @@ jobs:
       merge-strategy: ${{ inputs.merge-strategy }}
       release-version: ${{ inputs.release-version }}
       bump-rule: ${{ inputs.bump-rule }}
-      run-tests-wait: 600
-      publish-to-test-pypi: false
+      run-tests-wait: ${{ inputs.run-tests-wait }}
+      publish-option: ${{ inputs.publish-option }}
     secrets:
       git-token: ${{ secrets.AUTO_PROJECT_PAT }}
       pypi-token: ${{ secrets.PYPI_TOKEN }}
